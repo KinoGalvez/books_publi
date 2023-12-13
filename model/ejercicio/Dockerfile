@@ -5,9 +5,9 @@ FROM python:3.8
 WORKDIR /app
 
 # Copia los archivos necesarios al contenedor
-COPY requirements.txt .
+COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
+
 
 # Expone el puerto que tu aplicación Flask utiliza
 EXPOSE 5000
