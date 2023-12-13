@@ -8,7 +8,11 @@ import sqlite3
 from sklearn.linear_model import LinearRegression
 
 
-# os.chdir(os.path.dirname(__file__))
+
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+os.path.join(dir_path,"data","advertising_data.db")
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -20,13 +24,13 @@ def hello():
 # 1. Endpoint que devuelva la predicción de los nuevos datos enviados mediante argumentos en la llamada
 @app.route('/v1/predict', methods=['GET'])
 def predict():
-    conn = sqlite3.connect('./data/advertising_data.db')
+    conn = sqlite3.connect(os.path.join(dir_path,"data","advertising_data.db"))#('./data/advertising_data.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM advertising_data')
     advertising = cursor.fetchall()
     conn.close()    
     
-    model = pickle.load(open('./data/advertising_model','rb'))
+    model = pickle.load(open(os.path.join(dir_path,"data","advertising_model"),'rb'))
 
     tv = request.args.get('tv', None)
     radio = request.args.get('radio', None)
@@ -40,7 +44,7 @@ def predict():
 
 @app.route('/predict', methods=['GET'])
 def predict_list():
-    model = pickle.load(open('./data/advertising_model','rb'))
+    model = pickle.load(open(os.path.join(dir_path,"data","advertising_model"),'rb'))#('./data/advertising_model','rb'))
     data = request.get_json()
     
     input_values = data['data'][0]
@@ -58,7 +62,7 @@ def predict_list():
 def ingest_data():
     data = request.get_json()
 
-    connection = sqlite3.connect('./data/advertising_data.db')
+    connection = sqlite3.connect(os.path.join(dir_path,"data","advertising_data.db"))#('./data/advertising_data.db')
     cursor = connection.cursor()
 
     cursor.execute('INSERT INTO advertising_data (TV, radio, newpaper, sales) VALUES (?, ?, ?, ?)', (data['TV'], data['radio'], data['newpaper'], data['sales']))
@@ -76,7 +80,7 @@ def add_data():
     for row in data:
         tv, radio, newpaper, sales = row
         query = "INSERT INTO Advertising (tv, radio, newpaper, sales) VALUES (?, ?, ?, ?)"
-        connection = sqlite3.connect('./data/advertising_data.db')
+        connection = sqlite3.connect(os.path.join(dir_path,"data","advertising_data.db"))#('./data/advertising_data.db')
         cursor = connection.cursor()
         cursor.execute(query, (tv, radio, newpaper, sales))
         connection.commit()
@@ -93,7 +97,7 @@ def ingest_datas():
     for row in data.get('data', []):
         tv, radio, newpaper, sales = row
         query = "INSERT INTO advertising_data (TV, radio, newpaper, sales) VALUES (?, ?, ?, ?)"
-        connection = sqlite3.connect('./data/advertising_data.db')
+        connection = sqlite3.connect(os.path.join(dir_path,"data","advertising_data.db"))#('./data/advertising_data.db')
         cursor = connection.cursor()
         cursor.execute(query, (tv, radio, newpaper, sales))
 
@@ -105,7 +109,7 @@ def ingest_datas():
 @app.route('/retrain', methods=['POST'])
 def retrain():
     query = "SELECT * FROM advertising_data;"
-    conn = sqlite3.connect('./data/advertising_data.db')
+    conn = sqlite3.connect(os.path.join(dir_path,"data","advertising_data.db"))#('./data/advertising_data.db')
     crsr = conn.cursor()
     crsr.execute(query)
     ans = crsr.fetchall()
@@ -147,4 +151,4 @@ def retrain():
 
     # return jsonify({'message': 'Modelo reentrenado correctamente.'})
 
-app.run()
+app.run(host='0.0.0.0',port=5000)
